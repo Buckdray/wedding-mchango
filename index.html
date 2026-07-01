@@ -12,7 +12,7 @@
    Leave blank to run in offline demo mode (browser storage).
    ============================================================ */
 window.SUPABASE_URL  = "https://ssihqujwcrimqmzqcbqc.supabase.co";   // e.g. "https://abcdxyz.supabase.co"
-window.SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNzaWhxdWp3Y3JpbXFtenFjYnFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI5MjUwNTUsImV4cCI6MjA5ODUwMTA1NX0.IuHP-5QVavwMMNF9b8X6c1wtRHb6xkmjeZtaIiT9cP0";   // the anon public key (safe to expose — RLS guards data)
+window.SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNzaWhxdWp3Y3JpbXFtenFjYnFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI5MjUwNTUsImV4cCI6MjA5ODUwMTA1NX0.IuHP-5QVavwMMNF9b8X6c1wtRHb6xkmjeZtaIiT9cP0";   // the anon public key (safe to expose — RLS guards data)   // the anon public key (safe to expose — RLS guards data)   // the anon public key (safe to expose — RLS guards data)
 </script>
 <style>
   :root{
@@ -821,6 +821,7 @@ function buildDispatchMessage(){
 }
 let LAST_CHANGES=null;
 async function renderDispatch(){
+  CACHE=await DB.contributors();   // always work from the current list
   const ch=await computeChanges();LAST_CHANGES=ch;const dp=ch.dp;
   $("dispName").value=dp.contact.name||"";$("dispPhone").value=dp.contact.phone||"";
   const box=$("dispChanges");
@@ -836,6 +837,8 @@ async function saveDispatcherContact(){
   $("dispContactNote").style.color="var(--aqua-d)";$("dispContactNote").textContent="Dispatcher saved ✓";setTimeout(()=>$("dispContactNote").textContent="",2500);
 }
 async function openDispatchPreview(){
+  CACHE=await DB.contributors();           // ensure the message reflects current data
+  LAST_CHANGES=await computeChanges();
   const dp=await DB.dispatch();const msg=buildDispatchMessage();$("dispMsg").textContent=msg;
   $("dispModalSub").textContent=LAST_CHANGES&&LAST_CHANGES.first?"This will set the baseline for future change tracking.":(LAST_CHANGES&&LAST_CHANGES.rows.length?`${LAST_CHANGES.rows.length} change(s) since last update.`:"No changes — sends current totals.");
   const wa=$("dispWa");
