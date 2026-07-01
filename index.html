@@ -12,7 +12,7 @@
    Leave blank to run in offline demo mode (browser storage).
    ============================================================ */
 window.SUPABASE_URL  = "https://ssihqujwcrimqmzqcbqc.supabase.co";   // e.g. "https://abcdxyz.supabase.co"
-window.SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNzaWhxdWp3Y3JpbXFtenFjYnFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI5MjUwNTUsImV4cCI6MjA5ODUwMTA1NX0.IuHP-5QVavwMMNF9b8X6c1wtRHb6xkmjeZtaIiT9cP0";   // the anon public key (safe to expose — RLS guards data)   // the anon public key (safe to expose — RLS guards data)   // the anon public key (safe to expose — RLS guards data)
+window.SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNzaWhxdWp3Y3JpbXFtenFjYnFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI5MjUwNTUsImV4cCI6MjA5ODUwMTA1NX0.IuHP-5QVavwMMNF9b8X6c1wtRHb6xkmjeZtaIiT9cP0";   // the anon public key (safe to expose — RLS guards data)
 </script>
 <style>
   :root{
@@ -257,7 +257,8 @@ window.SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmF
         <div class="crumb">Mchango Tracker</div>
         <h1 id="viewTitle">Dashboard</h1>
       </div>
-      <div class="avatar" id="avatar">DR</div>
+      <span id="liveDot" title="Live update received" style="width:8px;height:8px;border-radius:50%;background:#2f7d54;margin-left:auto;margin-right:10px;opacity:0;transition:opacity .3s"></span>
+      <div class="avatar" id="avatar" style="margin-left:0">DR</div>
     </div>
 
     <div class="content">
@@ -497,8 +498,12 @@ const DB = {
   },
   async upsertContributor(c){
     if(HAS_DB){
-      if(c.id){await sb.from("contributors").update({name:c.name,phone:c.phone,pledged:c.pledged,paid:c.paid}).eq("id",c.id);}
-      else{await sb.from("contributors").insert({name:c.name,phone:c.phone,pledged:c.pledged,paid:c.paid});}
+      let res;
+      if(c.id){res=await sb.from("contributors").update({name:c.name,phone:c.phone,pledged:c.pledged,paid:c.paid}).eq("id",c.id).select();}
+      else{res=await sb.from("contributors").insert({name:c.name,phone:c.phone,pledged:c.pledged,paid:c.paid}).select();}
+      if(res.error) throw new Error(res.error.message||"Save was rejected by the database.");
+      if(!c.id && (!res.data || !res.data.length)) throw new Error("Insert returned no row — likely blocked by permissions (RLS). Check your role.");
+      return res.data;
     }else{
       const d=LS.get("contributors",[]);
       if(c.id){const t=d.find(x=>x.id===c.id);Object.assign(t,c);}
@@ -507,7 +512,7 @@ const DB = {
     }
   },
   async deleteContributor(id){
-    if(HAS_DB)await sb.from("contributors").delete().eq("id",id);
+    if(HAS_DB){const {error}=await sb.from("contributors").delete().eq("id",id);if(error)throw new Error(error.message);}
     else LS.set("contributors",LS.get("contributors",[]).filter(x=>x.id!==id));
   },
 
@@ -585,7 +590,7 @@ async function doLogin(){
   $("loginBtn").disabled=false;
   if(!s){$("loginErr").textContent="Wrong username or password.";return;}
   session=s;await DB.setLocalSession(s);$("loginErr").textContent="";
-  await enterApp();
+  await enterApp();startRealtime();
 }
 async function doLogout(){await DB.logout();await DB.clearLocalSession();session=null;location.reload();}
 
@@ -728,20 +733,29 @@ async function saveEdit(){
   if(!name){$("eNote").style.color="var(--danger)";$("eNote").textContent="Name is required.";return;}
   const phone=$("ePhone").value.replace(/[^0-9]/g,""),pledged=cleanNum($("ePledged").value);let paid=cleanNum($("ePaid").value);
   if(paid>pledged)paid=pledged;
-  if(eCurrent){await DB.upsertContributor({id:eCurrent.id,name,phone,pledged,paid});await logAction(`Edited pledge: ${name}`);}
-  else{await DB.upsertContributor({name,phone,pledged,paid});await logAction(`Added pledge: ${name} (TZS ${fmt(pledged)})`);}
+  try{
+    if(eCurrent){await DB.upsertContributor({id:eCurrent.id,name,phone,pledged,paid});await logAction(`Edited pledge: ${name}`);}
+    else{await DB.upsertContributor({name,phone,pledged,paid});await logAction(`Added pledge: ${name} (TZS ${fmt(pledged)})`);}
+  }catch(err){
+    $("eNote").style.color="var(--danger)";
+    $("eNote").textContent="Couldn't save: "+err.message;
+    return;
+  }
   $("editOverlay").classList.remove("open");await render();
 }
 async function deleteEdit(){
   if(!eCurrent)return;if(!confirm(`Delete ${eCurrent.name}? This cannot be undone.`))return;
-  await DB.deleteContributor(eCurrent.id);await logAction(`Deleted pledge: ${eCurrent.name}`);$("editOverlay").classList.remove("open");await render();
+  try{await DB.deleteContributor(eCurrent.id);}catch(err){$("eNote").style.color="var(--danger)";$("eNote").textContent="Couldn't delete: "+err.message;return;}
+  await logAction(`Deleted pledge: ${eCurrent.name}`);$("editOverlay").classList.remove("open");await render();
 }
 let payCurrent=null;
 function openPay(id){payCurrent=CACHE.find(c=>c.id===id);$("payTitle").textContent=`Payment — ${payCurrent.name}`;$("paySub").textContent=`Pledged TZS ${fmt(payCurrent.pledged)} · currently paid ${fmt(payCurrent.paid)}`;$("payAmt").value=payCurrent.paid;$("payOverlay").classList.add("open");}
 async function savePay(full){
   let amt=full?payCurrent.pledged:cleanNum($("payAmt").value);
   if(amt>payCurrent.pledged)amt=payCurrent.pledged;if(amt<0)amt=0;
-  await DB.upsertContributor({id:payCurrent.id,name:payCurrent.name,phone:payCurrent.phone,pledged:payCurrent.pledged,paid:amt});
+  try{
+    await DB.upsertContributor({id:payCurrent.id,name:payCurrent.name,phone:payCurrent.phone,pledged:payCurrent.pledged,paid:amt});
+  }catch(err){alert("Couldn't save payment: "+err.message);return;}
   const st=amt<=0?"pledged":amt>=payCurrent.pledged?"paid":"partial";
   await logAction(`Recorded payment: ${payCurrent.name} now at TZS ${fmt(amt)} (${st})`);
   $("payOverlay").classList.remove("open");await render();
@@ -816,7 +830,7 @@ function buildDispatchMessage(){
   }
   msg+=`\n*Orodha kamili:*\n🟣 Ahadi · ☑️ Amepunguza · ✅ Amemaliza\n\n`;
   d.forEach((c,i)=>{let line=`${i+1}. ${c.name} ${fmt(c.pledged)}/- ${markSymbol(c.status)}`;if(c.status==="partial")line+=` (${fmt(c.paid)})`;msg+=line+`\n`;});
-  msg+=`\n_Malipo: Stanbic 9120003845239 · Mixx 0715123050 · Selcom/Mpesa 0756444796 · Jina: Irene Mlaki_`;
+  msg+=`\n*Malipo:*\nStanbic Bank: 9120003845239\nMixx by Yas: 0715123050\nSelcom Pesa/Mpesa: 0756444796\nJina: Irene Mlaki`;
   return msg;
 }
 let LAST_CHANGES=null;
@@ -888,8 +902,34 @@ $("dispWa").addEventListener("click",async e=>{if($("dispWa").classList.contains
 $("dispClose").onclick=()=>$("dispOverlay").classList.remove("open");
 document.querySelectorAll(".overlay").forEach(o=>o.addEventListener("click",e=>{if(e.target===o)o.classList.remove("open");}));
 
+/* ---------- realtime (connected mode only) ---------- */
+let RT_CHANNEL=null;
+function startRealtime(){
+  if(!HAS_DB||RT_CHANNEL)return;
+  RT_CHANNEL=sb.channel("mchango-changes")
+    .on("postgres_changes",{event:"*",schema:"public",table:"contributors"},async()=>{await onRemoteChange();})
+    .on("postgres_changes",{event:"*",schema:"public",table:"dispatch_state"},async()=>{if(view==="dispatch")await renderDispatch();})
+    .subscribe();
+}
+let RT_TIMER=null;
+async function onRemoteChange(){
+  // debounce a burst of changes into a single refresh
+  clearTimeout(RT_TIMER);
+  RT_TIMER=setTimeout(async()=>{
+    CACHE=await DB.contributors();
+    renderDash(CACHE);
+    if(view==="people"&&can.seeContributors()){renderChips(CACHE);renderList(CACHE);}
+    if(view==="dispatch")await renderDispatch();
+    showLiveDot();
+  },250);
+}
+function showLiveDot(){
+  const el=$("liveDot"); if(!el)return;
+  el.style.opacity="1"; clearTimeout(el._t); el._t=setTimeout(()=>{el.style.opacity="0";},1200);
+}
+
 /* ---------- boot ---------- */
-(async()=>{const s=await DB.currentSession();if(s){session=s;await enterApp();}})();
+(async()=>{const s=await DB.currentSession();if(s){session=s;await enterApp();startRealtime();}})();
 </script>
 </body>
 </html>
