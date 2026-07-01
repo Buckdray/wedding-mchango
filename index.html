@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arnold Bukangwa — Wedding Mchango</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ============================================================
+   PASTE YOUR SUPABASE KEYS HERE
+   Settings > API in your Supabase project.
+   Leave blank to run in offline demo mode (browser storage).
+   ============================================================ */
+window.SUPABASE_URL  = "";   // e.g. "https://abcdxyz.supabase.co"
+window.SUPABASE_ANON = "";   // the anon public key (safe to expose — RLS guards data)
+</script>
+<style>
+  :root{
+    --cream:#FFF6DE; --cream-2:#FFFDF6; --card:#ffffff;
+    --aqua:#8BDFDD; --aqua-d:#0E7A6E; --aqua-soft:#D9F3F1;
+    --teal:#0E4E4C; --teal-2:#0A3E3C;
+    --coral:#F48F68; --coral-d:#C05A32; --coral-soft:#FDE7DD;
+    --butter:#FFE394; --butter-d:#8A6A12; --butter-soft:#FFF3D0;
+    --ink:#243330; --muted:#7d8a86; --line:#EFE6CC; --line-2:#E7DDC0;
+    --danger:#c2453e; --danger-soft:#f8e5e3;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{font-family:"Segoe UI",system-ui,-apple-system,sans-serif;background:var(--cream);color:var(--ink);line-height:1.45}
+  button{font-family:inherit}
+  .hidden{display:none !important}
+  ::-webkit-scrollbar{width:9px;height:9px} ::-webkit-scrollbar-thumb{background:#d9e6e3;border-radius:8px}
+
+  /* ---------------- Login ---------------- */
+  #login{min-height:100vh;display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(circle at 30% 15%,#146360,#0A3E3C);padding:20px}
+  .login-card{background:var(--cream-2);border-radius:20px;padding:32px 26px;width:100%;max-width:390px;
+    box-shadow:0 24px 70px rgba(0,0,0,.4);border-top:4px solid var(--aqua)}
+  .login-card .mark{width:44px;height:44px;border-radius:13px;background:var(--aqua);color:var(--teal);
+    display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;margin-bottom:16px}
+  .login-card .eyebrow{font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--coral-d);font-weight:700}
+  .login-card h1{font-family:Georgia,serif;font-size:24px;color:var(--teal);margin:5px 0 2px}
+  .login-card p.d{font-size:12.5px;color:var(--muted);font-style:italic;margin-bottom:22px}
+  .field{margin-bottom:13px}
+  .field label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px}
+  .field input,.field select{width:100%;padding:11px 13px;border:1px solid var(--line-2);border-radius:10px;font-size:15px;background:#fff;color:var(--ink)}
+  .field input:focus,.field select:focus{outline:2px solid var(--aqua);border-color:transparent}
+  .login-btn{width:100%;background:var(--teal);color:#fff;border:none;border-radius:10px;padding:12px;font-size:15px;font-weight:600;cursor:pointer;margin-top:6px}
+  .login-btn:hover{background:var(--teal-2)}
+  .login-err{color:var(--danger);font-size:12.5px;margin-top:10px;min-height:16px;text-align:center}
+  .demo-hint{margin-top:18px;background:var(--cream);border:1px dashed var(--line-2);border-radius:10px;padding:11px;font-size:11.5px;color:var(--muted);line-height:1.8}
+  .demo-hint b{color:var(--teal)}
+  .demo-hint code{background:var(--aqua-soft);padding:1px 6px;border-radius:5px;color:var(--aqua-d);font-size:11px}
+
+  /* ---------------- App shell (sidebar) ---------------- */
+  #app{display:flex;min-height:100vh}
+  aside{width:224px;flex:0 0 auto;background:var(--teal);color:#CFEFEE;display:flex;flex-direction:column;
+    padding:16px 12px;transition:width .18s ease;position:sticky;top:0;height:100vh}
+  aside.collapsed{width:60px}
+  .side-head{display:flex;align-items:center;gap:9px;padding:2px 6px 16px}
+  .side-head .mark{width:30px;height:30px;border-radius:9px;background:var(--aqua);color:var(--teal);
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex:0 0 auto}
+  .side-head .title{overflow:hidden;white-space:nowrap}
+  .side-head .title .k{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:#7FC8C4}
+  .side-head .title .n{font-family:Georgia,serif;font-size:14px;color:#fff}
+  .collapse-btn{margin-left:auto;background:none;border:none;color:var(--aqua);cursor:pointer;font-size:18px;line-height:1;padding:4px;flex:0 0 auto}
+  aside.collapsed .side-head{justify-content:center;padding:2px 0 16px}
+  aside.collapsed .side-head .title,aside.collapsed .collapse-btn{display:none}
+
+  .nav-item{display:flex;align-items:center;gap:11px;padding:10px 11px;border-radius:9px;font-size:13.5px;font-weight:500;
+    color:#CFEFEE;cursor:pointer;border:none;background:none;width:100%;text-align:left;margin-bottom:2px;white-space:nowrap}
+  .nav-item .ic{font-size:18px;width:20px;text-align:center;flex:0 0 auto}
+  .nav-item:hover{background:rgba(255,255,255,.08)}
+  .nav-item.active{background:var(--aqua);color:var(--teal);font-weight:600}
+  .nav-item .lbl{overflow:hidden}
+  aside.collapsed .nav-item{justify-content:center;padding:10px 0}
+  aside.collapsed .nav-item .lbl{display:none}
+  .nav-spacer{margin-top:auto}
+  .side-user{padding:10px 8px;border-top:1px solid rgba(255,255,255,.12);margin-top:8px;font-size:12px;white-space:nowrap;overflow:hidden}
+  .side-user .nm{color:#fff;font-weight:600}
+  .side-user .rl{color:#7FC8C4;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em}
+  aside.collapsed .side-user{text-align:center;padding:10px 0}
+  aside.collapsed .side-user .meta{display:none}
+
+  main{flex:1;min-width:0;display:flex;flex-direction:column}
+  .topbar{display:flex;align-items:center;gap:12px;padding:14px 22px;background:var(--cream-2);border-bottom:1px solid var(--line)}
+  .hamburger{display:none;background:none;border:none;font-size:22px;color:var(--teal);cursor:pointer}
+  .topbar .crumb{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--coral-d);font-weight:700}
+  .topbar h1{font-family:Georgia,serif;font-size:17px;color:var(--teal)}
+  .topbar .avatar{margin-left:auto;width:32px;height:32px;border-radius:50%;background:var(--coral);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:600}
+  .content{padding:22px;max-width:900px;width:100%}
+
+  h2.sec{font-family:Georgia,serif;font-size:20px;color:var(--teal);margin-bottom:3px}
+  p.seclead{font-size:12.5px;color:var(--muted);margin-bottom:18px}
+
+  /* ---------------- Dashboard ---------------- */
+  .kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:11px}
+  @media(min-width:620px){.kpis{grid-template-columns:repeat(4,1fr)}}
+  .kpi{background:var(--card);border:0.5px solid var(--line);border-radius:14px;padding:15px}
+  .kpi .lbl{font-size:10px;text-transform:uppercase;letter-spacing:.06em;font-weight:700}
+  .kpi .lbl.a{color:var(--aqua-d)} .kpi .lbl.c{color:var(--coral-d)} .kpi .lbl.t{color:var(--teal)} .kpi .lbl.b{color:var(--butter-d)}
+  .kpi .val{font-family:Georgia,serif;font-size:22px;margin-top:5px;color:var(--teal)}
+  .kpi .sub{font-size:11px;color:var(--muted);margin-top:2px}
+
+  .panel{background:var(--card);border:0.5px solid var(--line);border-radius:16px;padding:17px;margin-top:14px}
+  .panel h3{font-size:14px;margin-bottom:13px;color:var(--teal)}
+  .bar{height:15px;background:var(--butter-soft);border-radius:8px;overflow:hidden;display:flex;margin:6px 0}
+  .bar .fp{background:var(--aqua)} .bar .fpart{background:repeating-linear-gradient(45deg,var(--coral),var(--coral) 6px,#F9B49A 6px,#F9B49A 12px)}
+  .legend{display:flex;gap:15px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);margin-top:8px}
+  .legend span{display:inline-flex;align-items:center;gap:5px}
+  .dot{width:9px;height:9px;border-radius:50%} .dot.paid{background:var(--aqua)} .dot.partial{background:var(--coral)} .dot.pledged{background:var(--butter)}
+
+  .donut-row{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+  .donut{width:132px;height:132px;border-radius:50%;flex:0 0 auto}
+  .donut-key{font-size:12.5px;flex:1;min-width:130px}
+  .donut-key div{display:flex;align-items:center;gap:8px;margin:6px 0}
+  .donut-key b{margin-left:auto;font-family:Georgia,serif;color:var(--teal)}
+
+  .hbars .row{display:grid;grid-template-columns:1fr 96px;gap:9px;align-items:center;margin:8px 0;font-size:12.5px}
+  .hbars .track{background:var(--butter-soft);border-radius:6px;height:16px;overflow:hidden}
+  .hbars .tf{height:100%;background:var(--teal)}
+  .hbars .amt{text-align:right;font-family:Georgia,serif;color:var(--coral-d)}
+  .hbars .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px}
+
+  /* ---------------- Controls / list ---------------- */
+  .toolbar{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+  .search{flex:1;min-width:180px;padding:10px 13px;border:0.5px solid var(--line-2);border-radius:10px;font-size:14px;background:var(--card)}
+  .search:focus{outline:2px solid var(--aqua);border-color:transparent}
+  .btn{border:none;border-radius:10px;padding:10px 15px;font-size:13px;font-weight:600;cursor:pointer}
+  .btn-primary{background:var(--teal);color:#fff} .btn-primary:hover{background:var(--teal-2)}
+  .btn-ghost{background:var(--card);border:0.5px solid var(--line-2);color:var(--muted)}
+  .btn-ghost:hover{border-color:var(--aqua);color:var(--aqua-d)}
+  .chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:13px}
+  .chip{border:0.5px solid var(--line-2);background:var(--card);color:var(--muted);padding:6px 13px;border-radius:20px;font-size:12.5px;cursor:pointer;font-weight:500}
+  .chip .n{opacity:.65;margin-left:4px} .chip.active{background:var(--teal);color:#fff;border-color:var(--teal)}
+
+  ul.list{list-style:none}
+  .person{background:var(--card);border:0.5px solid var(--line);border-radius:14px;margin-bottom:10px;padding:14px}
+  .ptop{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .pname{font-weight:600;font-size:15px;color:var(--teal)} .pmeta{font-size:12px;color:var(--muted);margin-top:2px}
+  .pmeta .owed{color:var(--coral-d);font-weight:600} .pmeta .nophone{color:var(--danger)}
+  .badge{font-size:10.5px;font-weight:700;padding:4px 10px;border-radius:20px;white-space:nowrap}
+  .badge.paid{background:var(--aqua-soft);color:var(--aqua-d)} .badge.partial{background:var(--coral-soft);color:var(--coral-d)} .badge.pledged{background:var(--butter-soft);color:var(--butter-d)}
+  .pacts{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+  .btn-sm{border-radius:9px;padding:8px 12px;font-size:12px;font-weight:600;cursor:pointer;border:none}
+  .btn-wa{background:#25936b;color:#fff;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+  .btn-wa.disabled{background:#c9c0b4;pointer-events:none}
+  .btn-edit{background:var(--cream);border:0.5px solid var(--line-2);color:var(--muted)}
+  .btn-pay{background:var(--coral-soft);color:var(--coral-d);border:1px solid #F4B79E}
+  .empty{text-align:center;color:var(--muted);padding:38px 0;font-size:14px}
+
+  /* ---------------- Modal ---------------- */
+  .overlay{position:fixed;inset:0;background:rgba(14,78,76,.5);display:none;align-items:center;justify-content:center;z-index:80;padding:14px}
+  .overlay.open{display:flex}
+  .modal{background:var(--cream-2);width:100%;max-width:460px;border-radius:16px;padding:20px;max-height:90vh;overflow-y:auto;border-top:3px solid var(--aqua)}
+  .modal h3{font-family:Georgia,serif;font-size:18px;color:var(--teal);margin-bottom:2px}
+  .modal .sub{font-size:12px;color:var(--muted);margin-bottom:14px}
+  .msgbox{background:var(--cream);border:1px dashed var(--line-2);border-radius:11px;padding:13px;font-size:13px;white-space:pre-wrap;line-height:1.5;margin-top:4px;color:#4A4A44}
+  .tone-row{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 10px}
+  .tone{border:0.5px solid var(--line-2);background:var(--card);color:var(--muted);padding:6px 11px;border-radius:18px;font-size:11.5px;cursor:pointer;font-weight:500}
+  .tone.active{background:var(--butter);color:var(--butter-d);border-color:#E9C862}
+  .modal-actions{display:flex;gap:8px;margin-top:14px}
+  .modal-actions .btn{flex:1;text-align:center}
+  .btn-danger{background:var(--danger-soft);color:var(--danger);border:1px solid #e6b8b6}
+  .note{color:var(--aqua-d);font-size:12px;text-align:center;margin-top:8px;min-height:14px}
+
+  /* ---------------- Admin ---------------- */
+  table.users{width:100%;border-collapse:collapse;font-size:13px}
+  table.users th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding:8px 6px;border-bottom:1px solid var(--line)}
+  table.users td{padding:10px 6px;border-bottom:1px solid var(--line)}
+  .rolepill{font-size:10px;font-weight:700;padding:2px 9px;border-radius:14px;text-transform:uppercase}
+  .rolepill.super_admin{background:var(--aqua-soft);color:var(--aqua-d)} .rolepill.admin{background:var(--coral-soft);color:var(--coral-d)} .rolepill.viewer{background:var(--butter-soft);color:var(--butter-d)}
+  .locked{background:var(--butter-soft);border:1px solid #E9C862;border-radius:14px;padding:18px;text-align:center;color:var(--butter-d);font-size:13.5px}
+
+  /* ---------------- Architecture ---------------- */
+  .arch svg{width:100%;height:auto;background:var(--card);border:0.5px solid var(--line);border-radius:16px}
+  .arch-note{font-size:12.5px;color:var(--muted);line-height:1.8;margin-top:12px}
+  .arch-note code{background:var(--aqua-soft);padding:1px 6px;border-radius:5px;color:var(--aqua-d);font-size:11.5px}
+  .banner{background:var(--butter-soft);border:1px solid #E9C862;border-radius:12px;padding:12px 14px;font-size:12px;color:var(--butter-d);margin-bottom:16px;line-height:1.6}
+  .banner b{color:var(--teal)}
+
+  /* dispatcher list — mirrors the committee sheet */
+  .dl-row{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:0.5px solid var(--line);font-size:13px}
+  .dl-row:last-child{border-bottom:none}
+  .dl-num{color:var(--muted);font-size:11px;width:22px;flex:0 0 auto;text-align:right}
+  .dl-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .dl-amt{font-family:Georgia,serif;color:var(--teal);flex:0 0 auto}
+  .dl-mark{flex:0 0 auto;width:20px;text-align:center;font-size:13px}
+  .dl-mark.paid{color:var(--aqua-d)} .dl-mark.partial{color:var(--coral-d)} .dl-mark.pledged{color:var(--butter-d)}
+  .dl-sub{font-size:11px;color:var(--coral-d);flex:0 0 auto}
+  .disp-change{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;padding:7px 0;border-bottom:0.5px solid var(--line)}
+  .disp-change:last-child{border-bottom:none}
+  .disp-change .d{color:var(--aqua-d);font-weight:600}
+  .log-item{background:var(--card);border:0.5px solid var(--line);border-radius:10px;padding:10px 13px;font-size:12px;margin-bottom:6px;display:flex;justify-content:space-between;gap:10px}
+  .log-item .t{color:var(--muted);white-space:nowrap;font-size:11px}
+
+  .scrim{position:fixed;inset:0;background:rgba(14,78,76,.4);z-index:40;display:none}
+  .scrim.open{display:block}
+
+  /* ---------------- Mobile ---------------- */
+  @media(max-width:720px){
+    aside{position:fixed;left:0;top:0;z-index:50;transform:translateX(-100%);transition:transform .2s ease;width:224px}
+    aside.mobile-open{transform:translateX(0)}
+    aside.collapsed{width:224px} /* on mobile the drawer is always full */
+    aside.collapsed .side-head .title,aside.collapsed .collapse-btn,aside.collapsed .nav-item .lbl,aside.collapsed .side-user .meta{display:revert}
+    aside.collapsed .nav-item{justify-content:flex-start;padding:10px 11px}
+    .hamburger{display:block}
+    .content{padding:16px}
+    .topbar{padding:12px 16px}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<section id="login">
+  <div class="login-card">
+    <div class="mark">A</div>
+    <div class="eyebrow">Maandalizi ya Harusi</div>
+    <h1>Arnold Bukangwa</h1>
+    <p class="d">22 Agosti 2026 · Committee console</p>
+    <div class="field"><label for="lu">Username</label><input id="lu" autocomplete="username" placeholder="dray"></div>
+    <div class="field"><label for="lp">Password</label><input id="lp" type="password" autocomplete="current-password" placeholder="••••••••"></div>
+    <button class="login-btn" id="loginBtn">Sign in</button>
+    <div class="login-err" id="loginErr"></div>
+  </div>
+</section>
+
+<!-- ============ APP ============ -->
+<div id="app" class="hidden">
+  <aside id="sidebar">
+    <div class="side-head">
+      <div class="mark">A</div>
+      <div class="title"><div class="k">Mchango</div><div class="n">Arnold</div></div>
+      <button class="collapse-btn" id="collapseBtn" aria-label="Collapse menu">‹</button>
+    </div>
+    <button class="nav-item active" data-v="dash"><span class="ic">◧</span><span class="lbl">Dashboard</span></button>
+    <button class="nav-item" data-v="people"><span class="ic">☰</span><span class="lbl">Contributors</span></button>
+    <button class="nav-item" data-v="admin" id="navAdmin"><span class="ic">◈</span><span class="lbl">Admin</span></button>
+    <button class="nav-item" data-v="dispatch"><span class="ic">✈</span><span class="lbl">Dispatcher</span></button>
+    <button class="nav-item" data-v="arch"><span class="ic">⌗</span><span class="lbl">Architecture</span></button>
+    <button class="nav-item" data-v="log"><span class="ic">↻</span><span class="lbl">Activity</span></button>
+    <div class="nav-spacer"></div>
+    <div class="side-user">
+      <div class="meta"><div class="nm" id="suName">—</div><div class="rl" id="suRole">—</div></div>
+    </div>
+    <button class="nav-item" id="logoutBtn"><span class="ic">⎋</span><span class="lbl">Log out</span></button>
+  </aside>
+
+  <div class="scrim" id="scrim"></div>
+
+  <main>
+    <div class="topbar">
+      <button class="hamburger" id="hamburger" aria-label="Open menu">☰</button>
+      <div>
+        <div class="crumb">Mchango Tracker</div>
+        <h1 id="viewTitle">Dashboard</h1>
+      </div>
+      <div class="avatar" id="avatar">DR</div>
+    </div>
+
+    <div class="content">
+      <!-- DASHBOARD -->
+      <section id="v-dash">
+        <h2 class="sec">Where we stand</h2>
+        <p class="seclead">Live totals across all 72 pledges.</p>
+        <div class="kpis">
+          <div class="kpi"><div class="lbl a">Collected</div><div class="val" id="kCollected">0</div><div class="sub" id="kCollectedSub">TZS</div></div>
+          <div class="kpi"><div class="lbl t">Total pledged</div><div class="val" id="kGoal">0</div><div class="sub">TZS goal</div></div>
+          <div class="kpi"><div class="lbl c">Outstanding</div><div class="val" id="kOwed">0</div><div class="sub">still to collect</div></div>
+          <div class="kpi"><div class="lbl b">Contributors</div><div class="val" id="kCount">0</div><div class="sub" id="kCountSub"></div></div>
+        </div>
+        <div class="panel">
+          <h3>Collection progress</h3>
+          <div class="bar"><div class="fp" id="barPaid" style="width:0"></div><div class="fpart" id="barPart" style="width:0"></div></div>
+          <div class="legend">
+            <span><i class="dot paid"></i>Fully paid</span>
+            <span><i class="dot partial"></i>Partial received</span>
+            <span><i class="dot pledged"></i>Not yet paid</span>
+          </div>
+        </div>
+        <div class="panel">
+          <h3>Status breakdown</h3>
+          <div class="donut-row"><div class="donut" id="donut"></div><div class="donut-key" id="donutKey"></div></div>
+        </div>
+        <div class="panel">
+          <h3>Biggest amounts still outstanding</h3>
+          <div class="hbars" id="topOwed"></div>
+        </div>
+      </section>
+
+      <!-- CONTRIBUTORS -->
+      <section id="v-people" class="hidden">
+        <h2 class="sec">Contributors</h2>
+        <p class="seclead">Follow up, record payments, and manage pledges. WhatsApp opens the person's chat with the reminder pre-typed.</p>
+        <div class="toolbar">
+          <input class="search" id="search" placeholder="Search a name…" autocomplete="off">
+          <button class="btn btn-primary" id="addBtn">+ Add pledge</button>
+        </div>
+        <div class="chips" id="chips">
+          <button class="chip active" data-f="follow">To follow up <span class="n" id="cFollow"></span></button>
+          <button class="chip" data-f="all">All <span class="n" id="cAll"></span></button>
+          <button class="chip" data-f="pledged">Not paid <span class="n" id="cPledged"></span></button>
+          <button class="chip" data-f="partial">Partial <span class="n" id="cPartial"></span></button>
+          <button class="chip" data-f="paid">Paid <span class="n" id="cPaid"></span></button>
+          <button class="chip" data-f="nophone">No number <span class="n" id="cNophone"></span></button>
+        </div>
+        <ul class="list" id="list"></ul>
+      </section>
+
+      <!-- ADMIN -->
+      <section id="v-admin" class="hidden">
+        <h2 class="sec">Admin</h2>
+        <p class="seclead">Manage committee accounts and roles.</p>
+        <div id="adminBody"></div>
+      </section>
+
+      <!-- ARCHITECTURE -->
+      <section id="v-arch" class="hidden">
+        <h2 class="sec">How it's built</h2>
+        <p class="seclead">The data model and hosting architecture for the production version.</p>
+        <div class="banner"><b>Security note.</b> In this standalone file, login and roles are enforced only in the browser — fine for a demo, not for real access control. When hosted, roles must be enforced by Supabase Row-Level Security (server side). The diagram below is the real target.</div>
+        <div class="arch" id="archDiagram"></div>
+        <div class="arch-note" id="archNote"></div>
+      </section>
+
+      <!-- DISPATCHER -->
+      <section id="v-dispatch" class="hidden">
+        <h2 class="sec">Dispatcher</h2>
+        <p class="seclead">When amounts change, send a progress update to your dispatcher, who forwards it to the family group.</p>
+
+        <div class="panel" id="dispChangePanel">
+          <h3>Changes since last update</h3>
+          <div id="dispChanges"></div>
+        </div>
+
+        <div class="toolbar" style="margin-top:14px">
+          <button class="btn btn-primary" id="dispSendBtn" style="flex:1">Send update to dispatcher</button>
+          <button class="btn btn-ghost" id="dispPreviewBtn">Preview message</button>
+        </div>
+        <div class="note" id="dispNote" style="text-align:left"></div>
+
+        <div class="panel">
+          <h3>Dispatcher contact</h3>
+          <div class="field" style="margin-bottom:8px"><label>Name</label><input id="dispName" placeholder="e.g. Irene Mlaki" style="width:100%;padding:10px 12px;border:0.5px solid var(--line-2);border-radius:10px;font-size:14px;background:#fff"></div>
+          <div class="field" style="margin-bottom:8px"><label>WhatsApp number (intl, e.g. 255715123050)</label><input id="dispPhone" inputmode="numeric" placeholder="255…" style="width:100%;padding:10px 12px;border:0.5px solid var(--line-2);border-radius:10px;font-size:14px;background:#fff"></div>
+          <button class="btn btn-ghost" id="dispSaveContact">Save dispatcher</button>
+          <div class="note" id="dispContactNote" style="text-align:left"></div>
+        </div>
+
+        <div class="panel">
+          <h3>Full pledge list</h3>
+          <p style="font-size:11.5px;color:var(--muted);margin:-6px 0 12px">Same layout as the committee sheet — 🟣 not paid · ☑️ partial · ✅ complete. This is included in the dispatcher message.</p>
+          <div id="dispList"></div>
+        </div>
+      </section>
+
+      <!-- ACTIVITY -->
+      <section id="v-log" class="hidden">
+        <h2 class="sec">Activity</h2>
+        <p class="seclead">Every change made on this device, newest first.</p>
+        <div id="logBody"></div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<!-- ============ Follow-up modal ============ -->
+<div class="overlay" id="followOverlay">
+  <div class="modal">
+    <h3 id="fName">—</h3>
+    <div class="sub" id="fSub"></div>
+    <div class="tone-row" id="toneRow">
+      <button class="tone active" data-t="warm">Warm</button>
+      <button class="tone" data-t="short">Short</button>
+      <button class="tone" data-t="english">English</button>
+      <button class="tone" data-t="receipt">Ask for proof</button>
+    </div>
+    <div class="msgbox" id="fMsg"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="fCopy">Copy</button>
+      <a class="btn btn-wa" id="fWa" style="flex:1;justify-content:center" target="_blank" rel="noopener">Open WhatsApp</a>
+    </div>
+    <div class="note" id="fNote"></div>
+    <div class="modal-actions"><button class="btn btn-ghost" id="fClose">Close</button></div>
+  </div>
+</div>
+
+<!-- ============ Edit / add modal ============ -->
+<div class="overlay" id="editOverlay">
+  <div class="modal">
+    <h3 id="eTitle">Edit pledge</h3>
+    <div class="sub">Amounts in TZS. Status updates automatically from what's paid.</div>
+    <div class="field"><label>Name</label><input id="eName" placeholder="Full name"></div>
+    <div class="field"><label>WhatsApp number (intl, e.g. 255715123050)</label><input id="ePhone" inputmode="numeric" placeholder="255…"></div>
+    <div class="field"><label>Pledged amount</label><input id="ePledged" inputmode="numeric" placeholder="0"></div>
+    <div class="field"><label>Amount paid so far</label><input id="ePaid" inputmode="numeric" placeholder="0"></div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" id="eSave" style="flex:1">Save</button>
+      <button class="btn btn-danger" id="eDelete">Delete</button>
+    </div>
+    <div class="note" id="eNote"></div>
+    <div class="modal-actions"><button class="btn btn-ghost" id="eClose">Cancel</button></div>
+  </div>
+</div>
+
+<!-- ============ Payment modal ============ -->
+<div class="overlay" id="payOverlay">
+  <div class="modal">
+    <h3 id="payTitle">Record payment</h3>
+    <div class="sub" id="paySub"></div>
+    <div class="field"><label>New total amount paid (TZS)</label><input id="payAmt" inputmode="numeric"></div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" id="paySave" style="flex:1">Save payment</button>
+      <button class="btn btn-ghost" id="payFull">Mark fully paid</button>
+    </div>
+    <div class="modal-actions"><button class="btn btn-ghost" id="payClose">Cancel</button></div>
+  </div>
+</div>
+
+<!-- ============ Dispatcher preview modal ============ -->
+<div class="overlay" id="dispOverlay">
+  <div class="modal">
+    <h3>Message to dispatcher</h3>
+    <div class="sub" id="dispModalSub"></div>
+    <div class="msgbox" id="dispMsg"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="dispCopy">Copy</button>
+      <a class="btn btn-wa" id="dispWa" style="flex:1;justify-content:center" target="_blank" rel="noopener">Open WhatsApp</a>
+    </div>
+    <div class="note" id="dispModalNote"></div>
+    <div class="modal-actions"><button class="btn btn-ghost" id="dispClose">Close</button></div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   DATA LAYER — talks to Supabase when keys are set,
+   falls back to browser storage (demo mode) when they aren't.
+   Every function is async so the two backends are interchangeable.
+   ============================================================ */
+const HAS_DB = !!(window.SUPABASE_URL && window.SUPABASE_ANON);
+const sb = HAS_DB ? supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON) : null;
+
+/* ---- offline seed (used only when HAS_DB is false) ---- */
+/* No contributor data or passwords are embedded in this file.
+   - Connected mode: all data comes from Supabase.
+   - Offline test mode: drop a local, UNCOMMITTED seed file next to this
+     page (window.LOCAL_SEED = [...] and window.LOCAL_USERS = [...]) if you
+     want sample data. Never commit that file to a public repo. */
+const SEED = (window.LOCAL_SEED || []).map((r,i)=>({id:i+1,name:r[0],pledged:r[1],paid:r[2],phone:r[3]||""}));
+
+const LS={get(k,f){try{const v=localStorage.getItem("arnold_db_"+k);return v?JSON.parse(v):f;}catch(e){return f;}},set(k,v){localStorage.setItem("arnold_db_"+k,JSON.stringify(v));}};
+if(!HAS_DB){
+  if(!LS.get("contributors"))LS.set("contributors",SEED);
+  if(!LS.get("users"))LS.set("users", window.LOCAL_USERS || []);
+  if(!LS.get("log"))LS.set("log",[]);
+  if(!LS.get("dispatch"))LS.set("dispatch",{contact:{name:"",phone:""},snapshot:null,lastSent:null});
+}
+
+const normStatus=c=>c.paid<=0?"pledged":c.paid>=c.pledged?"paid":"partial";
+
+/* ---------- unified API ---------- */
+const DB = {
+  async login(username,password){
+    if(HAS_DB){
+      const email=username.includes("@")?username:username; // Supabase uses email
+      const {data,error}=await sb.auth.signInWithPassword({email,password});
+      if(error)return null;
+      const {data:prof}=await sb.from("profiles").select("*").eq("id",data.user.id).single();
+      if(!prof)return null;
+      return {id:data.user.id,name:prof.name,role:prof.role,is_dispatcher:prof.is_dispatcher};
+    }else{
+      const u=LS.get("users",[]).find(x=>x.username===username.toLowerCase()&&x.pass===password);
+      return u?{id:u.username,name:u.name,role:u.role,is_dispatcher:u.is_dispatcher}:null;
+    }
+  },
+  async logout(){ if(HAS_DB)await sb.auth.signOut(); },
+  async currentSession(){
+    if(HAS_DB){
+      const {data}=await sb.auth.getSession();
+      if(!data.session)return null;
+      const uid=data.session.user.id;
+      const {data:prof}=await sb.from("profiles").select("*").eq("id",uid).single();
+      if(!prof)return null;
+      return {id:uid,name:prof.name,role:prof.role,is_dispatcher:prof.is_dispatcher};
+    }
+    return LS.get("session",null);
+  },
+  async setLocalSession(s){ if(!HAS_DB)LS.set("session",s); },
+  async clearLocalSession(){ if(!HAS_DB)LS.set("session",null); },
+
+  async contributors(){
+    if(HAS_DB){const {data}=await sb.from("contributors").select("*").order("id");return (data||[]).map(c=>({...c,status:normStatus(c)}));}
+    return LS.get("contributors",[]).map(c=>({...c,status:normStatus(c)}));
+  },
+  async upsertContributor(c){
+    if(HAS_DB){
+      if(c.id){await sb.from("contributors").update({name:c.name,phone:c.phone,pledged:c.pledged,paid:c.paid}).eq("id",c.id);}
+      else{await sb.from("contributors").insert({name:c.name,phone:c.phone,pledged:c.pledged,paid:c.paid});}
+    }else{
+      const d=LS.get("contributors",[]);
+      if(c.id){const t=d.find(x=>x.id===c.id);Object.assign(t,c);}
+      else{c.id=Math.max(0,...d.map(x=>x.id))+1;d.push(c);}
+      LS.set("contributors",d);
+    }
+  },
+  async deleteContributor(id){
+    if(HAS_DB)await sb.from("contributors").delete().eq("id",id);
+    else LS.set("contributors",LS.get("contributors",[]).filter(x=>x.id!==id));
+  },
+
+  async users(){
+    if(HAS_DB){const {data}=await sb.from("profiles").select("*").order("created_at");return data||[];}
+    return LS.get("users",[]);
+  },
+  async createUser(u){
+    if(HAS_DB){
+      // create auth user then profile (needs the user to confirm email unless disabled)
+      const {data,error}=await sb.auth.admin.createUser?{}:{error:"admin"}; // admin API not available with anon key
+      return {error:"In production, add users via Supabase Auth then insert their profile row. See setup notes."};
+    }else{
+      const us=LS.get("users",[]);
+      if(us.some(x=>x.username===u.username))return {error:"Username already exists."};
+      us.push(u);LS.set("users",us);return {};
+    }
+  },
+  async updateUserFlags(idOrUsername,patch){
+    if(HAS_DB)await sb.from("profiles").update(patch).eq("id",idOrUsername);
+    else{const us=LS.get("users",[]);const t=us.find(x=>x.username===idOrUsername);if(t)Object.assign(t,patch);LS.set("users",us);}
+  },
+  async removeUser(idOrUsername){
+    if(HAS_DB)await sb.from("profiles").delete().eq("id",idOrUsername);
+    else LS.set("users",LS.get("users",[]).filter(x=>(x.username)!==idOrUsername));
+  },
+
+  async log(){
+    if(HAS_DB){const {data}=await sb.from("audit_log").select("*").order("created_at",{ascending:false}).limit(200);return (data||[]).map(e=>({msg:e.action,who:e.actor_name,t:e.created_at}));}
+    return LS.get("log",[]);
+  },
+  async addLog(action){
+    if(HAS_DB){await sb.from("audit_log").insert({actor:session.id,actor_name:session.name,action});}
+    else{const l=LS.get("log",[]);l.unshift({msg:action,who:(session&&session.name)||"?",t:new Date().toISOString()});LS.set("log",l.slice(0,300));}
+  },
+
+  async dispatch(){
+    if(HAS_DB){const {data}=await sb.from("dispatch_state").select("*").eq("id",1).single();return {contact:LS.get("dispcontact",{name:"",phone:""}),snapshot:data?data.snapshot:null,lastSent:data?data.last_sent:null};}
+    return LS.get("dispatch",{contact:{name:"",phone:""},snapshot:null,lastSent:null});
+  },
+  async saveDispatchContact(contact){ LS.set("dispcontact",contact); if(!HAS_DB){const d=LS.get("dispatch");d.contact=contact;LS.set("dispatch",d);} },
+  async commitDispatch(snapshot){
+    if(HAS_DB){await sb.from("dispatch_state").update({snapshot,last_sent:new Date().toISOString(),last_sent_by:session.id}).eq("id",1);}
+    else{const d=LS.get("dispatch");d.snapshot=snapshot;d.lastSent=new Date().toISOString();LS.set("dispatch",d);}
+  },
+};
+
+/* ============================================================
+   APP
+   ============================================================ */
+const $=id=>document.getElementById(id);
+const fmt=n=>Number(n||0).toLocaleString("en-US");
+const outstanding=c=>Math.max(0,c.pledged-c.paid);
+const cleanNum=v=>parseInt(String(v).replace(/[^0-9]/g,""))||0;
+const esc=s=>String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const initials=n=>n.replace(/[^A-Za-z ]/g,"").trim().split(/\s+/).slice(0,2).map(x=>x[0]||"").join("").toUpperCase()||"?";
+const markSymbol=s=>s==="paid"?"✅":s==="partial"?"☑️":"🟣";
+async function logAction(m){await DB.addLog(m);}
+
+let session=null;
+const ROLE_LABEL={super_admin:"Super admin",admin:"Admin",viewer:"Viewer"};
+const can={
+  editData:()=>session&&(session.role==="super_admin"||session.role==="admin"),
+  manageUsers:()=>session&&session.role==="super_admin",
+  seeArchitecture:()=>session&&session.role==="super_admin",
+  seeContributors:()=>session&&(session.role==="super_admin"||session.role==="admin"),
+  dispatch:()=>session&&(session.is_dispatcher||session.role==="super_admin"||session.role==="admin"),
+};
+
+/* ---------- login ---------- */
+async function doLogin(){
+  const u=$("lu").value.trim(),p=$("lp").value;
+  $("loginBtn").disabled=true;$("loginErr").textContent="Signing in…";
+  const s=await DB.login(u,p);
+  $("loginBtn").disabled=false;
+  if(!s){$("loginErr").textContent="Wrong username or password.";return;}
+  session=s;await DB.setLocalSession(s);$("loginErr").textContent="";
+  await enterApp();
+}
+async function doLogout(){await DB.logout();await DB.clearLocalSession();session=null;location.reload();}
+
+function applyRoleVisibility(){
+  // nav items
+  const showAdmin=can.manageUsers(), showArch=can.seeArchitecture(), showPeople=can.seeContributors(), showDisp=can.dispatch();
+  document.querySelector('[data-v="admin"]').style.display=showAdmin?"":"none";
+  document.querySelector('[data-v="arch"]').style.display=showArch?"":"none";
+  document.querySelector('[data-v="people"]').style.display=showPeople?"":"none";
+  document.querySelector('[data-v="dispatch"]').style.display=showDisp?"":"none";
+  // activity log: super admin + admin only (viewers get clean dashboard)
+  document.querySelector('[data-v="log"]').style.display=can.editData()?"":"none";
+}
+
+async function enterApp(){
+  $("login").classList.add("hidden");$("app").classList.remove("hidden");
+  $("suName").textContent=session.name;
+  $("suRole").textContent=ROLE_LABEL[session.role]+(session.is_dispatcher?" · Dispatcher":"");
+  $("avatar").textContent=initials(session.name);
+  applyRoleVisibility();
+  if(LS.get("ui",{}).collapsed)$("sidebar").classList.add("collapsed"),$("collapseBtn").textContent="›";
+  await render();renderArch();
+  // viewers land on dashboard and can't leave it to restricted pages (nav hidden anyway)
+  switchView("dash");
+}
+
+/* ---------- views ---------- */
+const TITLES={dash:"Dashboard",people:"Contributors",admin:"Admin",dispatch:"Dispatcher",arch:"Architecture",log:"Activity"};
+let view="dash";
+async function switchView(v){
+  // guard: block restricted views even if reached programmatically
+  if(v==="admin"&&!can.manageUsers())v="dash";
+  if(v==="arch"&&!can.seeArchitecture())v="dash";
+  if(v==="people"&&!can.seeContributors())v="dash";
+  if(v==="dispatch"&&!can.dispatch())v="dash";
+  if(v==="log"&&!can.editData())v="dash";
+  view=v;
+  document.querySelectorAll('.nav-item[data-v]').forEach(b=>b.classList.toggle('active',b.dataset.v===v));
+  ["dash","people","admin","dispatch","arch","log"].forEach(x=>$("v-"+x).classList.toggle("hidden",x!==v));
+  $("viewTitle").textContent=TITLES[v];
+  if(v==="log")await renderLog();
+  if(v==="admin")await renderAdmin();
+  if(v==="dispatch")await renderDispatch();
+  closeDrawer();
+}
+
+function toggleCollapse(){const s=$("sidebar");s.classList.toggle("collapsed");$("collapseBtn").textContent=s.classList.contains("collapsed")?"›":"‹";const ui=LS.get("ui",{});ui.collapsed=s.classList.contains("collapsed");LS.set("ui",ui);}
+function openDrawer(){$("sidebar").classList.add("mobile-open");$("scrim").classList.add("open");}
+function closeDrawer(){$("sidebar").classList.remove("mobile-open");$("scrim").classList.remove("open");}
+
+/* ---------- contributor list ---------- */
+let filter="follow",query="",CACHE=[];
+function counts(d){return{all:d.length,follow:d.filter(c=>c.status!=="paid").length,pledged:d.filter(c=>c.status==="pledged").length,partial:d.filter(c=>c.status==="partial").length,paid:d.filter(c=>c.status==="paid").length,nophone:d.filter(c=>!c.phone).length};}
+
+async function render(){
+  CACHE=await DB.contributors();
+  renderDash(CACHE);
+  if(can.seeContributors()){renderChips(CACHE);renderList(CACHE);}
+}
+function renderChips(d){const c=counts(d);["cAll","cFollow","cPledged","cPartial","cPaid","cNophone"].forEach((id,i)=>{$(id).textContent=[c.all,c.follow,c.pledged,c.partial,c.paid,c.nophone][i];});}
+function renderList(d){
+  let rows=d;
+  if(filter==="follow")rows=rows.filter(c=>c.status!=="paid");
+  else if(filter==="nophone")rows=rows.filter(c=>!c.phone);
+  else if(filter!=="all")rows=rows.filter(c=>c.status===filter);
+  if(query){const q=query.toLowerCase();rows=rows.filter(c=>c.name.toLowerCase().includes(q));}
+  rows=[...rows].sort((a,b)=>outstanding(b)-outstanding(a)||a.name.localeCompare(b.name));
+  const ul=$("list");ul.innerHTML="";
+  if(!rows.length){ul.innerHTML='<div class="empty">Nobody in this view.</div>';return;}
+  const editable=can.editData();
+  rows.forEach(c=>{
+    const owe=outstanding(c);let meta;
+    if(c.status==="paid")meta=`Paid in full · TZS ${fmt(c.pledged)}`;
+    else if(c.status==="partial")meta=`Paid ${fmt(c.paid)} · <span class="owed">owes ${fmt(owe)}</span>`;
+    else meta=`Pledged TZS ${fmt(c.pledged)} · <span class="owed">nothing yet</span>`;
+    if(!c.phone)meta+=` · <span class="nophone">no number</span>`;
+    const label=c.status==="paid"?"Paid":c.status==="partial"?"Partial":"Not paid";
+    const li=document.createElement("li");li.className="person";
+    li.innerHTML=`<div class="ptop"><div><div class="pname">${esc(c.name)}</div><div class="pmeta">${meta}</div></div><span class="badge ${c.status}">${label}</span></div>
+    <div class="pacts">
+      ${c.status!=="paid"?`<button class="btn-sm btn-wa ${c.phone?'':'disabled'}" data-fu="${c.id}">WhatsApp</button>`:""}
+      ${editable&&c.status!=="paid"?`<button class="btn-sm btn-pay" data-pay="${c.id}">Record payment</button>`:""}
+      ${editable?`<button class="btn-sm btn-edit" data-edit="${c.id}">Edit</button>`:""}
+    </div>`;
+    ul.appendChild(li);
+  });
+}
+
+/* ---------- dashboard ---------- */
+function renderDash(d){
+  const goal=d.reduce((s,c)=>s+c.pledged,0),collected=d.reduce((s,c)=>s+c.paid,0),owed=goal-collected,c=counts(d);
+  $("kCollected").textContent=fmt(collected);$("kCollectedSub").textContent=goal?`${Math.round(collected/goal*100)}% of goal`:"";
+  $("kGoal").textContent=fmt(goal);$("kOwed").textContent=fmt(owed);$("kCount").textContent=c.all;$("kCountSub").textContent=`${c.paid} paid · ${c.partial} partial`;
+  const paidMoney=d.filter(x=>x.status==="paid").reduce((s,x)=>s+x.paid,0),partMoney=d.filter(x=>x.status==="partial").reduce((s,x)=>s+x.paid,0);
+  $("barPaid").style.width=(goal?paidMoney/goal*100:0)+"%";$("barPart").style.width=(goal?partMoney/goal*100:0)+"%";
+  const total=c.all||1,segs=[["Paid",c.paid,"#8BDFDD"],["Partial",c.partial,"#F48F68"],["Not paid",c.pledged,"#FFE394"]];
+  let acc=0,grad=segs.map(([_,v,col])=>{const a=acc/total*360;acc+=v;return `${col} ${a}deg ${acc/total*360}deg`;}).join(",");
+  const dn=$("donut");dn.style.background=`conic-gradient(${grad})`;dn.style.mask="radial-gradient(circle,transparent 38%,#000 39%)";dn.style.webkitMask="radial-gradient(circle,transparent 38%,#000 39%)";
+  $("donutKey").innerHTML=segs.map(([n,v,col])=>`<div><i class="dot" style="background:${col}"></i>${n}<b>${v}</b></div>`).join("");
+  const top=[...d].filter(x=>outstanding(x)>0).sort((a,b)=>outstanding(b)-outstanding(a)).slice(0,7),max=top.length?outstanding(top[0]):1;
+  $("topOwed").innerHTML=top.map(x=>`<div class="row"><div><div class="nm">${esc(x.name)}</div><div class="track"><div class="tf" style="width:${outstanding(x)/max*100}%"></div></div></div><div class="amt">${fmt(outstanding(x))}</div></div>`).join("")||'<div class="empty">Everyone is fully paid.</div>';
+}
+
+/* ---------- follow-up ---------- */
+const PAY_DETAILS="Stanbic Bank: 9120003845239\nMixx by Yas: 0715123050\nSelcom Pesa/Mpesa: 0756444796\nJina: Irene Mlaki";
+let fCurrent=null,tone="warm";
+function buildMsg(c){
+  const owe=outstanding(c),name=c.name;
+  if(tone==="short")return `Habari ${name}, ukumbusho wa mchango wa harusi ya Arnold (22 Aug). Salio: TZS ${fmt(owe)}.\n\n${PAY_DETAILS}\n\nAsante 🙏🏽`;
+  if(tone==="english"){const line=c.status==="partial"?`Thank you for the ${fmt(c.paid)} already received. The remaining balance is TZS ${fmt(owe)}.`:`This is a gentle reminder about your pledge of TZS ${fmt(c.pledged)}.`;return `Hello ${name}, warm greetings from the committee for Arnold Bukangwa's wedding (22 Aug 2026).\n\n${line} Whenever you're able, you can send it to:\n\n${PAY_DETAILS}\n\nThank you and God bless 🙏🏽`;}
+  if(tone==="receipt")return `Habari ${name}, tunashukuru kwa mchango wako kwa harusi ya Arnold.${c.status==="partial"?` Tumeona ${fmt(c.paid)}, salio TZS ${fmt(owe)}.`:""}\n\nUkishatuma, tafadhali tutumie screenshot ili tuweke kwenye rekodi:\n\n${PAY_DETAILS}\n\nMungu akubariki 🙏🏽`;
+  const body=c.status==="partial"?`Tunashukuru sana kwa ${fmt(c.paid)} uliyokwisha tuma. Salio lililobaki ni TZS ${fmt(owe)}. Utakapopata nafasi, unaweza kukamilisha kupitia:`:`Ni ukumbusho wa upendo kuhusu ahadi yako ya TZS ${fmt(c.pledged)}. Utakapopata nafasi, unaweza kutuma kupitia:`;
+  return `Habari ${name}, tunakusalimu kwa jina la kamati ya harusi ya Arnold Bukangwa (22 Agosti 2026).\n\n${body}\n\n${PAY_DETAILS}\n\nKaribu sana, na Mungu akubariki kwa kujitoa kwako 🙏🏽`;
+}
+function openFollow(id){
+  fCurrent=CACHE.find(c=>c.id===id);tone="warm";
+  document.querySelectorAll("#toneRow .tone").forEach(b=>b.classList.toggle("active",b.dataset.t==="warm"));
+  $("fName").textContent=fCurrent.name;
+  $("fSub").textContent=fCurrent.status==="partial"?`Paid ${fmt(fCurrent.paid)} · outstanding TZS ${fmt(outstanding(fCurrent))}`:`Pledged TZS ${fmt(fCurrent.pledged)} · nothing received`;
+  refreshFollow();$("fNote").textContent="";$("followOverlay").classList.add("open");
+}
+function refreshFollow(){
+  const msg=buildMsg(fCurrent);$("fMsg").textContent=msg;const wa=$("fWa");
+  if(fCurrent.phone){wa.href=`https://wa.me/${fCurrent.phone}?text=${encodeURIComponent(msg)}`;wa.classList.remove("disabled");wa.textContent="Open WhatsApp";}
+  else{wa.removeAttribute("href");wa.classList.add("disabled");wa.textContent="Add a number first";}
+}
+
+/* ---------- edit / add / pay ---------- */
+let eCurrent=null;
+function openEdit(id){
+  if(!can.editData())return;
+  if(id){eCurrent=CACHE.find(c=>c.id===id);$("eTitle").textContent="Edit pledge";$("eDelete").style.display="";}
+  else{eCurrent=null;$("eTitle").textContent="Add pledge";$("eDelete").style.display="none";}
+  $("eName").value=eCurrent?eCurrent.name:"";$("ePhone").value=eCurrent?eCurrent.phone:"";
+  $("ePledged").value=eCurrent?eCurrent.pledged:"";$("ePaid").value=eCurrent?eCurrent.paid:"0";
+  $("eNote").textContent="";$("editOverlay").classList.add("open");
+}
+async function saveEdit(){
+  const name=$("eName").value.trim();
+  if(!name){$("eNote").style.color="var(--danger)";$("eNote").textContent="Name is required.";return;}
+  const phone=$("ePhone").value.replace(/[^0-9]/g,""),pledged=cleanNum($("ePledged").value);let paid=cleanNum($("ePaid").value);
+  if(paid>pledged)paid=pledged;
+  if(eCurrent){await DB.upsertContributor({id:eCurrent.id,name,phone,pledged,paid});await logAction(`Edited pledge: ${name}`);}
+  else{await DB.upsertContributor({name,phone,pledged,paid});await logAction(`Added pledge: ${name} (TZS ${fmt(pledged)})`);}
+  $("editOverlay").classList.remove("open");await render();
+}
+async function deleteEdit(){
+  if(!eCurrent)return;if(!confirm(`Delete ${eCurrent.name}? This cannot be undone.`))return;
+  await DB.deleteContributor(eCurrent.id);await logAction(`Deleted pledge: ${eCurrent.name}`);$("editOverlay").classList.remove("open");await render();
+}
+let payCurrent=null;
+function openPay(id){payCurrent=CACHE.find(c=>c.id===id);$("payTitle").textContent=`Payment — ${payCurrent.name}`;$("paySub").textContent=`Pledged TZS ${fmt(payCurrent.pledged)} · currently paid ${fmt(payCurrent.paid)}`;$("payAmt").value=payCurrent.paid;$("payOverlay").classList.add("open");}
+async function savePay(full){
+  let amt=full?payCurrent.pledged:cleanNum($("payAmt").value);
+  if(amt>payCurrent.pledged)amt=payCurrent.pledged;if(amt<0)amt=0;
+  await DB.upsertContributor({id:payCurrent.id,name:payCurrent.name,phone:payCurrent.phone,pledged:payCurrent.pledged,paid:amt});
+  const st=amt<=0?"pledged":amt>=payCurrent.pledged?"paid":"partial";
+  await logAction(`Recorded payment: ${payCurrent.name} now at TZS ${fmt(amt)} (${st})`);
+  $("payOverlay").classList.remove("open");await render();
+}
+
+/* ---------- admin ---------- */
+async function renderAdmin(){
+  const body=$("adminBody");
+  if(!can.manageUsers()){body.innerHTML='<div class="locked">You need super-admin access to manage accounts.</div>';return;}
+  const users=await DB.users();
+  const dbNote=HAS_DB?`<div class="banner" style="margin-bottom:12px"><b>Connected to Supabase.</b> To add a login: create the user in Supabase → Authentication, then toggle their role and dispatcher flag here. New account creation from the app needs the service key and is intentionally not exposed in the browser.</div>`:"";
+  body.innerHTML=dbNote+`
+    <div class="panel"><h3>Committee accounts</h3>
+      <table class="users"><thead><tr><th>Name</th><th>${HAS_DB?"User ID":"Username"}</th><th>Role</th><th>Dispatcher</th><th></th></tr></thead><tbody>
+      ${users.map(u=>{const key=HAS_DB?u.id:u.username;const uname=HAS_DB?(u.id.slice(0,8)+"…"):u.username;const isMe=key===session.id;
+        return `<tr>
+        <td>${esc(u.name)}</td><td style="font-size:11px;color:var(--muted)">${esc(uname)}</td>
+        <td><span class="rolepill ${u.role}">${ROLE_LABEL[u.role]}</span></td>
+        <td><button class="btn-sm ${u.is_dispatcher?'btn-pay':'btn-edit'}" data-disp="${key}">${u.is_dispatcher?'Yes':'No'}</button></td>
+        <td style="text-align:right">${isMe?'<span style="font-size:11px;color:var(--muted)">you</span>':`<button class="btn-sm btn-edit" data-udel="${key}">Remove</button>`}</td>
+      </tr>`;}).join("")}
+      </tbody></table></div>
+    ${HAS_DB?"":`<div class="panel"><h3>Add account (demo mode)</h3>
+      <div class="field"><label>Display name</label><input id="nuName" placeholder="Irene Mlaki" style="width:100%;padding:10px 12px;border:0.5px solid var(--line-2);border-radius:10px"></div>
+      <div class="field"><label>Username</label><input id="nuUser" placeholder="irene" style="width:100%;padding:10px 12px;border:0.5px solid var(--line-2);border-radius:10px"></div>
+      <div class="field"><label>Password</label><input id="nuPass" placeholder="temporary password" style="width:100%;padding:10px 12px;border:0.5px solid var(--line-2);border-radius:10px"></div>
+      <div class="field"><label>Role</label><select id="nuRole" style="width:100%;padding:10px 12px;border:0.5px solid var(--line-2);border-radius:10px"><option value="viewer">Viewer — dashboard only</option><option value="admin">Admin — full activity</option><option value="super_admin">Super admin — everything</option></select></div>
+      <label style="font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:7px;margin:6px 0 12px"><input type="checkbox" id="nuDisp"> Also a dispatcher</label>
+      <button class="btn btn-primary" id="nuAdd">Create account</button><div class="note" id="nuNote"></div></div>`}
+    <div class="panel"><h3>Roles &amp; the dispatcher flag</h3><div class="arch-note">
+      <b>Viewer</b> — sees the dashboard only. No contributor list, no admin, no architecture.<br>
+      <b>Admin</b> — full activity: add / edit / delete pledges, record payments, run the dispatcher.<br>
+      <b>Super admin</b> — everything an admin can, plus manage accounts and view architecture.<br>
+      <b>Dispatcher</b> — not a role but a flag; grant it to any admin (or anyone) so they can send progress updates. More than one person can hold it.</div></div>`;
+  // dispatcher toggles
+  body.querySelectorAll("[data-disp]").forEach(b=>b.onclick=async()=>{
+    const key=b.dataset.disp,users=await DB.users(),u=users.find(x=>(HAS_DB?x.id:x.username)===key);
+    await DB.updateUserFlags(key,{is_dispatcher:!u.is_dispatcher});
+    await logAction(`${u.is_dispatcher?"Removed":"Granted"} dispatcher: ${u.name}`);await renderAdmin();
+  });
+  body.querySelectorAll("[data-udel]").forEach(b=>b.onclick=async()=>{
+    const key=b.dataset.udel;if(!confirm("Remove this account?"))return;
+    await DB.removeUser(key);await logAction(`Removed account: ${key}`);await renderAdmin();
+  });
+  const addBtn=$("nuAdd");
+  if(addBtn)addBtn.onclick=async()=>{
+    const name=$("nuName").value.trim(),user=$("nuUser").value.trim().toLowerCase(),pass=$("nuPass").value,role=$("nuRole").value,disp=$("nuDisp").checked;
+    if(!name||!user||!pass){$("nuNote").style.color="var(--danger)";$("nuNote").textContent="All fields required.";return;}
+    const r=await DB.createUser({username:user,name,role,is_dispatcher:disp,pass});
+    if(r.error){$("nuNote").style.color="var(--danger)";$("nuNote").textContent=r.error;return;}
+    await logAction(`Created account: ${user} (${role})`);await renderAdmin();
+  };
+}
+
+/* ---------- dispatcher ---------- */
+async function computeChanges(){
+  const dp=await DB.dispatch();const snap=dp.snapshot;
+  if(!snap)return{first:true,rows:[],dp};
+  const rows=[];
+  CACHE.forEach(c=>{const prev=snap[c.id];if(prev===undefined){if(c.paid>0)rows.push({name:c.name,from:0,to:c.paid});}else if(c.paid!==prev){rows.push({name:c.name,from:prev,to:c.paid});}});
+  return{first:false,rows,dp};
+}
+function buildDispatchMessage(){
+  const d=CACHE;const goal=d.reduce((s,c)=>s+c.pledged,0),collected=d.reduce((s,c)=>s+c.paid,0),pct=goal?Math.round(collected/goal*100):0;
+  const done=d.filter(c=>c.status==="paid").length,partial=d.filter(c=>c.status==="partial").length;
+  let msg=`*Taarifa ya Mchango — Harusi ya Arnold Bukangwa (22 Aug 2026)*\n\n`;
+  msg+=`Jumla iliyokusanywa: *TZS ${fmt(collected)}* kati ya ${fmt(goal)} (${pct}%)\n`;
+  msg+=`Wamemaliza: ${done} · Sehemu: ${partial} · Wanaosubiri: ${d.length-done-partial}\n`;
+  if(LAST_CHANGES&&!LAST_CHANGES.first&&LAST_CHANGES.rows.length){
+    msg+=`\n*Malipo mapya tangu taarifa iliyopita:*\n`;
+    LAST_CHANGES.rows.forEach(r=>{msg+=r.from===0?`• ${r.name}: ametuma TZS ${fmt(r.to)}\n`:`• ${r.name}: ${fmt(r.from)} → ${fmt(r.to)}\n`;});
+  }
+  msg+=`\n*Orodha kamili:*\n🟣 Ahadi · ☑️ Amepunguza · ✅ Amemaliza\n\n`;
+  d.forEach((c,i)=>{let line=`${i+1}. ${c.name} ${fmt(c.pledged)}/- ${markSymbol(c.status)}`;if(c.status==="partial")line+=` (${fmt(c.paid)})`;msg+=line+`\n`;});
+  msg+=`\n_Malipo: Stanbic 9120003845239 · Mixx 0715123050 · Selcom/Mpesa 0756444796 · Jina: Irene Mlaki_`;
+  return msg;
+}
+let LAST_CHANGES=null;
+async function renderDispatch(){
+  const ch=await computeChanges();LAST_CHANGES=ch;const dp=ch.dp;
+  $("dispName").value=dp.contact.name||"";$("dispPhone").value=dp.contact.phone||"";
+  const box=$("dispChanges");
+  if(ch.first)box.innerHTML=`<div style="font-size:12.5px;color:var(--muted);line-height:1.7">No baseline yet. Send the first update to set the starting point — after that, this lists only what changed since your last dispatch.</div>`;
+  else if(!ch.rows.length)box.innerHTML=`<div class="empty" style="padding:14px 0">No changes since the last update.</div>`;
+  else box.innerHTML=ch.rows.map(r=>`<div class="disp-change"><span>${esc(r.name)}</span><span class="d">${r.from===0?"+ "+fmt(r.to):fmt(r.from)+" → "+fmt(r.to)}</span></div>`).join("");
+  $("dispNote").textContent=dp.lastSent?`Last update sent ${new Date(dp.lastSent).toLocaleString()}.`:"";
+  $("dispNote").style.color="var(--muted)";
+  $("dispList").innerHTML=CACHE.map((c,i)=>`<div class="dl-row"><span class="dl-num">${i+1}</span><span class="dl-name">${esc(c.name)}</span><span class="dl-amt">${fmt(c.pledged)}</span>${c.status==="partial"?`<span class="dl-sub">(${fmt(c.paid)})</span>`:""}<span class="dl-mark ${c.status}">${markSymbol(c.status)}</span></div>`).join("");
+}
+async function saveDispatcherContact(){
+  await DB.saveDispatchContact({name:$("dispName").value.trim(),phone:$("dispPhone").value.replace(/[^0-9]/g,"")});
+  $("dispContactNote").style.color="var(--aqua-d)";$("dispContactNote").textContent="Dispatcher saved ✓";setTimeout(()=>$("dispContactNote").textContent="",2500);
+}
+async function openDispatchPreview(){
+  const dp=await DB.dispatch();const msg=buildDispatchMessage();$("dispMsg").textContent=msg;
+  $("dispModalSub").textContent=LAST_CHANGES&&LAST_CHANGES.first?"This will set the baseline for future change tracking.":(LAST_CHANGES&&LAST_CHANGES.rows.length?`${LAST_CHANGES.rows.length} change(s) since last update.`:"No changes — sends current totals.");
+  const wa=$("dispWa");
+  if(dp.contact.phone){wa.href=`https://wa.me/${dp.contact.phone}?text=${encodeURIComponent(msg)}`;wa.classList.remove("disabled");wa.textContent="Open WhatsApp";}
+  else{wa.removeAttribute("href");wa.classList.add("disabled");wa.textContent="Add dispatcher number first";}
+  $("dispModalNote").textContent="";$("dispOverlay").classList.add("open");
+}
+async function commitDispatch(){
+  const snap={};CACHE.forEach(c=>snap[c.id]=c.paid);
+  await DB.commitDispatch(snap);await logAction("Sent progress update to dispatcher");await renderDispatch();
+}
+
+/* ---------- activity ---------- */
+async function renderLog(){const l=await DB.log();$("logBody").innerHTML=l.length?l.map(e=>`<div class="log-item"><div>${esc(e.msg)} <span style="color:var(--muted)">— ${esc(e.who||"?")}</span></div><div class="t">${new Date(e.t).toLocaleString()}</div></div>`).join(""):'<div class="empty">No activity yet.</div>';}
+
+/* ---------- architecture ---------- */
+function renderArch(){
+  $("archDiagram").innerHTML=`<svg viewBox="0 0 720 400" role="img" aria-label="Architecture diagram"><defs><style>.b{fill:#ffffff;stroke:#EFE6CC;stroke-width:1.5}.tb{font-family:Segoe UI,sans-serif;font-size:13px;font-weight:700;fill:#0E4E4C}.ts{font-family:Segoe UI,sans-serif;font-size:11px;fill:#7d8a86}.lbl{font-family:Segoe UI,sans-serif;font-size:10.5px;fill:#7d8a86}</style><marker id="arr" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6" fill="#F48F68"/></marker></defs>
+    <rect class="b" x="20" y="150" width="170" height="100" rx="12" fill="#FFF6DE"/><text class="tb" x="105" y="180" text-anchor="middle">Committee phones</text><text class="ts" x="105" y="200" text-anchor="middle">Static app (this file)</text><text class="ts" x="105" y="216" text-anchor="middle">GitHub Pages</text><text class="ts" x="105" y="232" text-anchor="middle">HTML + JS, no secrets</text>
+    <rect class="b" x="275" y="40" width="180" height="90" rx="12" fill="#D9F3F1"/><text class="tb" x="365" y="68" text-anchor="middle">Supabase Auth</text><text class="ts" x="365" y="88" text-anchor="middle" fill="#0E7A6E">email + password</text><text class="ts" x="365" y="104" text-anchor="middle" fill="#0E7A6E">issues signed JWT</text>
+    <rect class="b" x="275" y="165" width="180" height="120" rx="12" fill="#D9F3F1"/><text class="tb" x="365" y="192" text-anchor="middle">Postgres + RLS</text><text class="ts" x="365" y="212" text-anchor="middle" fill="#0E7A6E">contributors · profiles</text><text class="ts" x="365" y="228" text-anchor="middle" fill="#0E7A6E">payments · audit · dispatch</text><text class="ts" x="365" y="252" text-anchor="middle" fill="#C05A32">policies enforce roles</text>
+    <rect class="b" x="540" y="150" width="160" height="100" rx="12" fill="#FFF3D0"/><text class="tb" x="620" y="180" text-anchor="middle" fill="#25936b">WhatsApp</text><text class="ts" x="620" y="200" text-anchor="middle">wa.me deep link</text><text class="ts" x="620" y="216" text-anchor="middle">one-tap dispatch</text>
+    <path d="M190,180 C230,150 240,110 275,90" stroke="#F48F68" stroke-width="2" fill="none" marker-end="url(#arr)"/><text class="lbl" x="205" y="128">login</text>
+    <path d="M365,130 L365,165" stroke="#F48F68" stroke-width="2" fill="none" marker-end="url(#arr)"/><text class="lbl" x="372" y="152">JWT</text>
+    <path d="M190,215 C230,225 240,225 275,225" stroke="#F48F68" stroke-width="2" fill="none" marker-end="url(#arr)"/><text class="lbl" x="200" y="245">REST + JWT</text>
+    <path d="M190,212 C360,320 470,300 615,250" stroke="#F48F68" stroke-width="2" fill="none" marker-end="url(#arr)"/><text class="lbl" x="460" y="302">tap to send</text></svg>`;
+  $("archNote").innerHTML=`<b>Mode:</b> ${HAS_DB?'<span style="color:var(--aqua-d)">Connected to Supabase — roles enforced by Postgres RLS.</span>':'<span style="color:var(--coral-d)">Offline demo — add your keys to go live.</span>'}<br><br><b>Data model.</b> <code>contributors</code> (status derived) · <code>profiles</code> (role + is_dispatcher) · <code>payments</code> · <code>audit_log</code> (records the actor) · <code>dispatch_state</code> (shared change-tracking baseline).<br><br><b>Why numbers can't be spoofed.</b> Every write runs as the user's JWT. RLS checks <code>role_at_least('admin')</code> before any insert/update/delete on contributors, and a trigger stamps <code>updated_by</code>. A viewer's token is rejected at the database, not the browser.<br><br><b>Automated messages.</b> A Supabase scheduled function (pg_cron) can run daily, diff the dispatch snapshot, and notify the dispatcher via email/SMS if anything changed — WhatsApp-to-group still needs a human forward, which is what the dispatcher does.`;
+}
+
+/* ---------- events ---------- */
+$("loginBtn").onclick=doLogin;$("lp").addEventListener("keydown",e=>{if(e.key==="Enter")doLogin();});
+$("logoutBtn").onclick=doLogout;$("collapseBtn").onclick=toggleCollapse;$("hamburger").onclick=openDrawer;$("scrim").onclick=closeDrawer;
+document.querySelectorAll('.nav-item[data-v]').forEach(b=>b.onclick=()=>switchView(b.dataset.v));
+$("search").addEventListener("input",e=>{query=e.target.value;renderList(CACHE);});
+$("chips").addEventListener("click",e=>{const c=e.target.closest(".chip");if(!c)return;filter=c.dataset.f;document.querySelectorAll(".chip").forEach(x=>x.classList.toggle("active",x===c));renderList(CACHE);});
+$("addBtn").onclick=()=>openEdit(null);
+$("list").addEventListener("click",e=>{const fu=e.target.closest("[data-fu]"),pay=e.target.closest("[data-pay]"),ed=e.target.closest("[data-edit]");if(fu&&!fu.classList.contains("disabled"))openFollow(+fu.dataset.fu);if(pay)openPay(+pay.dataset.pay);if(ed)openEdit(+ed.dataset.edit);});
+$("toneRow").addEventListener("click",e=>{const b=e.target.closest(".tone");if(!b)return;tone=b.dataset.t;document.querySelectorAll("#toneRow .tone").forEach(x=>x.classList.toggle("active",x===b));refreshFollow();});
+$("fCopy").onclick=()=>{navigator.clipboard.writeText($("fMsg").textContent).then(()=>$("fNote").textContent="Copied ✓").catch(()=>$("fNote").textContent="Select and copy manually.");};
+$("fWa").addEventListener("click",()=>{if(fCurrent&&fCurrent.phone)logAction(`Sent follow-up to ${fCurrent.name}`);});
+$("fClose").onclick=()=>$("followOverlay").classList.remove("open");
+$("eSave").onclick=saveEdit;$("eDelete").onclick=deleteEdit;$("eClose").onclick=()=>$("editOverlay").classList.remove("open");
+$("paySave").onclick=()=>savePay(false);$("payFull").onclick=()=>savePay(true);$("payClose").onclick=()=>$("payOverlay").classList.remove("open");
+$("dispSaveContact").onclick=saveDispatcherContact;$("dispPreviewBtn").onclick=openDispatchPreview;$("dispSendBtn").onclick=openDispatchPreview;
+$("dispCopy").onclick=()=>{navigator.clipboard.writeText($("dispMsg").textContent).then(()=>{$("dispModalNote").style.color="var(--aqua-d)";$("dispModalNote").textContent="Copied ✓";}).catch(()=>$("dispModalNote").textContent="Select and copy manually.");};
+$("dispWa").addEventListener("click",async e=>{if($("dispWa").classList.contains("disabled")){e.preventDefault();return;}await commitDispatch();$("dispOverlay").classList.remove("open");});
+$("dispClose").onclick=()=>$("dispOverlay").classList.remove("open");
+document.querySelectorAll(".overlay").forEach(o=>o.addEventListener("click",e=>{if(e.target===o)o.classList.remove("open");}));
+
+/* ---------- boot ---------- */
+(async()=>{const s=await DB.currentSession();if(s){session=s;await enterApp();}})();
+</script>
+</body>
+</html>
