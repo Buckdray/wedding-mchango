@@ -265,7 +265,7 @@ window.SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmF
       <!-- DASHBOARD -->
       <section id="v-dash">
         <h2 class="sec">Where we stand</h2>
-        <p class="seclead">Live totals across all 72 pledges.</p>
+        <p class="seclead">Live totals across all <span id="dashCount">72</span> pledges.</p>
         <div class="kpis">
           <div class="kpi"><div class="lbl a">Collected</div><div class="val" id="kCollected">0</div><div class="sub" id="kCollectedSub">TZS</div></div>
           <div class="kpi"><div class="lbl t">Total pledged</div><div class="val" id="kGoal">0</div><div class="sub">TZS goal</div></div>
@@ -684,6 +684,7 @@ function renderDash(d){
   const goal=d.reduce((s,c)=>s+c.pledged,0),collected=d.reduce((s,c)=>s+c.paid,0),owed=goal-collected,c=counts(d);
   $("kCollected").textContent=fmt(collected);$("kCollectedSub").textContent=goal?`${Math.round(collected/goal*100)}% of goal`:"";
   $("kGoal").textContent=fmt(goal);$("kOwed").textContent=fmt(owed);$("kCount").textContent=c.all;$("kCountSub").textContent=`${c.paid} paid · ${c.partial} partial`;
+  {const dc=$("dashCount");if(dc)dc.textContent=c.all;}
   const paidMoney=d.filter(x=>x.status==="paid").reduce((s,x)=>s+x.paid,0),partMoney=d.filter(x=>x.status==="partial").reduce((s,x)=>s+x.paid,0);
   $("barPaid").style.width=(goal?paidMoney/goal*100:0)+"%";$("barPart").style.width=(goal?partMoney/goal*100:0)+"%";
   const total=c.all||1,segs=[["Paid",c.paid,"#8BDFDD"],["Partial",c.partial,"#F48F68"],["Not paid",c.pledged,"#FFE394"]];
